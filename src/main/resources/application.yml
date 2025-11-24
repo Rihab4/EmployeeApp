@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: employeeapp
+  datasource:
+    url: jdbc:mysql://localhost:3306/employeeapp?createDatabaseIfNotExist=true
+    username: root
+    password: ROUrou1122!
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    spring:
+      flyway:
+        enabled: false

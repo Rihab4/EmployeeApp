@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Directory</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        h1 { margin-bottom: 20px; }
+        #addBtn {
+            background-color: #4CAF50;
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        #addBtn:hover { background-color: #45a049; }
+
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .employee-card {
+            border: 1px solid #ccc;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .employee-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Employee Directory</h1>
+<button id="addBtn" onclick="window.location='add.html'">Add Employee</button>
+
+<div id="employeeGrid" class="employee-grid"></div>
+
+<script>
+    async function loadEmployees() {
+        try {
+            const resp = await fetch('/employees');
+            if (!resp.ok) return;
+            const employees = await resp.json();
+
+            const grid = document.getElementById('employeeGrid');
+            grid.innerHTML = '';
+
+            employees.forEach(emp => {
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+
+                const img = document.createElement('img');
+                img.src = emp.photoUrl || 'placeholder.png';
+                card.appendChild(img);
+
+                const name = document.createElement('div');
+                name.textContent = emp.firstName + ' ' + emp.lastName;
+                card.appendChild(name);
+
+                grid.appendChild(card);
+            });
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    loadEmployees();
+</script>
+</body>
+</html>

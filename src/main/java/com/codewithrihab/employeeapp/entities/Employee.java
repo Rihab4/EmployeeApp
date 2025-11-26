@@ -23,4 +23,6 @@ public class Employee {
     private String location;
     @Column(name = "role")
     private String role;
+    @Column(name = "photo_url")
+    private String photoUrl;
 }

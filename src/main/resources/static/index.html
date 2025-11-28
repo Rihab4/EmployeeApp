@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Directory</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         h1 { margin-bottom: 20px; }
+
         #addBtn {
             background-color: #4CAF50;
             padding: 10px 20px;
@@ -24,13 +25,17 @@
         }
 
         .employee-card {
+            position: relative;
             border: 1px solid #ccc;
             padding: 15px;
             text-align: center;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
         }
-
+        .employee-card:hover {
+            background-color: #f8f8f8;
+        }
         .employee-card img {
             width: 100%;
             height: 150px;
@@ -38,21 +43,82 @@
             border-radius: 6px;
             margin-bottom: 10px;
         }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .delete-btn:hover {
+            background: darkred;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            width: 300px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: #444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
+
 <h1>Employee Directory</h1>
-<button id="addBtn" onclick="window.location='add.html'">Add Employee 1</button>
+<button id="addBtn" onclick="window.location='add.html'">Add Employee</button>
 
 <div id="employeeGrid" class="employee-grid"></div>
+
+<!-- Modal -->
+<div id="detailsModal" class="modal">
+    <div class="modal-content">
+        <button class="close-modal" onclick="closeModal()">X</button>
+        <h2 id="modalName"></h2>
+        <p><strong>Email:</strong> <span id="modalEmail"></span></p>
+        <p><strong>Location:</strong> <span id="modalLocation"></span></p>
+        <p><strong>Role:</strong> <span id="modalRole"></span></p>
+    </div>
+</div>
 
 <script>
     async function loadEmployees() {
         try {
             const resp = await fetch('/employees');
             if (!resp.ok) return;
-            const employees = await resp.json();
 
+            const employees = await resp.json();
             const grid = document.getElementById('employeeGrid');
             grid.innerHTML = '';
 
@@ -60,10 +126,25 @@
                 const card = document.createElement('div');
                 card.className = 'employee-card';
 
+                // OPEN MODAL on click
+                card.onclick = () => openModal(emp);
+
+                // Delete button
+                const del = document.createElement('button');
+                del.className = 'delete-btn';
+                del.textContent = "X";
+                del.onclick = (e) => {
+                    e.stopPropagation(); // prevent modal
+                    deleteEmployee(emp.id);
+                };
+                card.appendChild(del);
+
+                // Photo
                 const img = document.createElement('img');
                 img.src = emp.photoUrl || 'placeholder.png';
                 card.appendChild(img);
 
+                // Name
                 const name = document.createElement('div');
                 name.textContent = emp.firstName + ' ' + emp.lastName;
                 card.appendChild(name);
@@ -75,7 +156,27 @@
         }
     }
 
+    function openModal(emp) {
+        document.getElementById('modalName').textContent = emp.firstName + ' ' + emp.lastName;
+        document.getElementById('modalEmail').textContent = emp.email || '';
+        document.getElementById('modalLocation').textContent = emp.location || '';
+        document.getElementById('modalRole').textContent = emp.role || '';
+        document.getElementById('detailsModal').style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('detailsModal').style.display = 'none';
+    }
+
+    async function deleteEmployee(id) {
+        if (!confirm("Are you sure you want to delete this employee?")) return;
+        const resp = await fetch(`/employees/${id}`, { method: 'DELETE' });
+        if (resp.ok) loadEmployees();
+        else alert("Failed to delete employee");
+    }
+
     loadEmployees();
 </script>
+
 </body>
 </html>
